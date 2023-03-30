@@ -7,7 +7,6 @@ import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 
 const app = express();
-const port = process.env.PORT || 5000;
 
 // middleware for production
 if (process.env.NODE_ENV === 'production') {
@@ -28,10 +27,12 @@ if (process.env.NODE_ENV === 'development') {
 
 // default route
 app.get('/', (req, res) => {
-  res.send('Hello, World!');
+  res.status(200).json({
+    status: 'success',
+    message: 'Welcome to the API'
+  });
 });
 
-// start the server
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+
+
+export default app;
