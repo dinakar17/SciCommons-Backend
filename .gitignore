@@ -1,0 +1,28 @@
+# Node.js related
+node_modules/
+*.log
+
+# Express related
+dist/
+
+# Next.js related
+.next/
+out/
+
+# TypeScript related
+*.tsbuildinfo
+*.js.map
+
+# Image server related
+uploads/
+images/
+
+# Other common files to ignore
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.vscode/
+.idea/
