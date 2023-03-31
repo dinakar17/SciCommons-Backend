@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
 export type UserDocument = mongoose.Document & {
+  photo: string;
   email: string;
   username: string;
   password: string;
@@ -10,24 +11,25 @@ export type UserDocument = mongoose.Document & {
   firstName: string;
   lastName: string;
   bio: string;
-  verified: boolean;
+  emailVerified: boolean | undefined;
+  verified: boolean | undefined;
   active: boolean;
   lastPasswordReset: Date;
-  signupToken: string;
-  signupTokenExpires: Date;
+  signupToken: string | undefined;
+  signupTokenExpires: Date | undefined;
   passwordChangedAt: Date;
-  passwordResetToken: string;
-  passwordResetExpires: Date;
+  passwordResetToken: string | undefined;
+  passwordResetExpires: Date | undefined;
   comparePassword: (password: string) => Promise<boolean>;
   changedPasswordAfter: (JWTTimestamp: number) => boolean;
   generatePasswordResetToken: () => string;
   createSignupToken: () => string;
-  verifySignupToken: (token: string) => boolean;
 };
 
 
 const userSchema = new mongoose.Schema<UserDocument>(
   {
+    photo: String,
     email: {
       type: String,
       unique: true,
@@ -42,12 +44,12 @@ const userSchema = new mongoose.Schema<UserDocument>(
       required: true,
       lowercase: true,
       trim: true,
-      minlength: [4, 'Username must be at least 4 characters long'],
+      minlength: [3, 'Username must be at least 3 characters long'],
     },
     password: {
       type: String,
       required: true,
-      minlength: [6, 'Password must be at least 6 characters long'],
+      minlength: [8, 'Password must be at least 6 characters long'],
     },
     passwordConfirm: {
       type: String,
@@ -72,6 +74,10 @@ const userSchema = new mongoose.Schema<UserDocument>(
     bio: {
       type: String,
       trim: true,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
     },
     verified: {
       type: Boolean,
@@ -151,10 +157,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp: number) {
 userSchema.methods.generatePasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
-this.passwordResetToken = crypto
-.createHash('sha256')
-.update(resetToken)
-.digest('hex');
+this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
 this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -167,11 +170,6 @@ userSchema.methods.createSignupToken = function () {
   this.signupToken = crypto.createHash('sha256').update(token).digest('hex');
   this.signupTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // expire in 24 hours
   return token;
-};
-
-// Verify signup token
-userSchema.methods.verifySignupToken = function (token: string) {
-  return this.signupToken === token;
 };
 
 
